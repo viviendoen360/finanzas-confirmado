@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Correo confirmado · Finanzas con $havi</title>
+  <style>
+    :root {
+      --bg: #0f1e4d;
+      --bg-2: #1d3fa8;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --primary: #2563eb;
+      --ok: #16a34a;
+      --ok-bg: #dcfce7;
+      --err: #dc2626;
+      --err-bg: #fee2e2;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --card: #0f172a;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --ok-bg: #14532d;
+        --err-bg: #7f1d1d;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(160deg, var(--bg), var(--bg-2));
+      color: var(--text);
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+    }
+    .brand { font-weight: 800; letter-spacing: .5px; color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .brand span { color: #f59e0b; }
+    .icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; font-weight: 700;
+    }
+    .ok .icon { background: var(--ok-bg); color: var(--ok); }
+    .err .icon { background: var(--err-bg); color: var(--err); }
+    h1 { font-size: 24px; margin: 0 0 12px; }
+    p { color: var(--muted); line-height: 1.5; margin: 0 0 24px; }
+    .btn {
+      display: inline-block; width: 100%;
+      padding: 14px 20px; border-radius: 12px;
+      background: var(--primary); color: #fff;
+      font-weight: 600; text-decoration: none;
+    }
+    .hint { font-size: 13px; margin: 16px 0 0; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="card ok" id="card">
+    <div class="brand">FINANZAS CON <span>$HAVI</span></div>
+    <div class="icon" id="icon">✓</div>
+    <h1 id="title">¡Correo confirmado!</h1>
+    <p id="message">Tu cuenta ya está activa. Vuelve a la app e inicia sesión con tu correo y contraseña.</p>
+    <a class="btn" id="open-app" href="finanzasconshavi://tabs/auth/login">Abrir la app</a>
+    <p class="hint" id="hint">Si el botón no abre la app, ábrela manualmente desde tu celular.</p>
+  </main>
+
+  <script>
+    (function () {
+      // Supabase sends the result in the URL hash (#access_token=... or #error=...)
+      // or, with PKCE, in the query string (?code=... or ?error=...).
+      var params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      new URLSearchParams(window.location.search).forEach(function (v, k) { params.set(k, v); });
+
+      // Never keep the session tokens in the address bar or browser history.
+      if (window.location.hash || window.location.search) {
+        history.replaceState(null, "", window.location.pathname);
+      }
+
+      var errorCode = params.get("error_code") || params.get("error");
+      if (!errorCode) return;
+
+      var card = document.getElementById("card");
+      card.classList.remove("ok");
+      card.classList.add("err");
+      document.getElementById("icon").textContent = "!";
+      document.title = "No se pudo confirmar · Finanzas con $havi";
+
+      var title = document.getElementById("title");
+      var message = document.getElementById("message");
+      if (errorCode === "otp_expired") {
+        title.textContent = "El enlace expiró";
+        message.textContent = "Este enlace de confirmación ya no es válido o ya fue usado. Intenta iniciar sesión en la app; si tu correo aún no está confirmado, regístrate de nuevo para recibir un enlace nuevo.";
+      } else {
+        title.textContent = "No se pudo confirmar tu correo";
+        message.textContent = "Ocurrió un problema al confirmar tu cuenta. Intenta iniciar sesión en la app o vuelve a registrarte para recibir un enlace nuevo.";
+      }
+    })();
+  </script>
+</body>
+</html>
